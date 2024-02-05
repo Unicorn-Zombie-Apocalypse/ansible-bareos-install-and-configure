@@ -1,0 +1,7 @@
+---
+- name: Bareos-server deploy and config
+  hosts: bareos-server
+  remote_user: uza
+  become: true
+  roles:
+    - bareos-server

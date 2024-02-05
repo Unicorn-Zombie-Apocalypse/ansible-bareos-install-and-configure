@@ -1,0 +1,9 @@
+all:
+  children:
+    bareos-server:
+      hosts:
+        install-bareos-server.home.infra:
+    bareos-client:
+      hosts:
+        demo-bareos-client1.home.infra:
+        demo-bareos-client2.home.infra:

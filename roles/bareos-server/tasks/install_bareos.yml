@@ -1,0 +1,26 @@
+- name: Setup bareos repo
+  import_tasks: setup_bareos_repo.yml
+
+- name: Install bareos
+  ansible.builtin.apt:
+    name:
+      - bareos 
+      - bareos-database-postgresql
+      - bareos-webui
+      - libapache2-mod-php
+    state: present
+    update_cache: yes
+  register: bareos_new_install
+
+- name: Change timezone
+  ansible.builtin.file:
+    src: "/usr/share/zoneinfo/{{ timezone }}"
+    dest: /etc/localtime 
+    state: link
+
+- name: Create symbolic link to bareous config config_dir
+  ansible.builtin.file:
+    src: /etc/bareos/bareos-dir.d
+    dest: "{{ config_install_path }}"
+    state: link
+

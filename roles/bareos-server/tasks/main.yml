@@ -1,0 +1,27 @@
+- name: Get installed packages
+  ansible.builtin.package_facts:
+    manager: "auto"
+
+- name: Install bareos because it's not installed
+  import_tasks: install_bareos.yml
+  when: "'bareos-webui' not in ansible_facts.packages"
+
+- name: Sync configs
+  import_tasks: sync_configs.yml
+
+- name: Restart bareos services 
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - bareos-dir
+    - bareos-fd
+    - bareos-sd
+  when: config_catalog.changed or config_console.changed  #Need to rework 
+
+- name: Restart apache services 
+  ansible.builtin.service:
+    name: apache2
+    state: restarted
+  when: apache_default_site.changed
+

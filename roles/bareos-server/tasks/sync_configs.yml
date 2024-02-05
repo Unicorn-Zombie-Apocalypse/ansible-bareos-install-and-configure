@@ -1,0 +1,51 @@
+- name: "Sync {{ type }}"
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ config_install_path }}/{{type}}/{{ item | regex_search ('\\w*\\.\\w*\\.j2$') | replace('.j2', '') }}"
+    mode: '750'
+  vars:
+    type: "console"
+  loop:
+     - "{{ lookup('fileglob', 'bareos-dir/{{ type }}/*') }}"
+  register: config_console
+
+- name: "Sync {{ type }}"
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ config_install_path }}/{{type}}/{{ item | regex_search ('\\w*\\.\\w*\\.j2$') | replace('.j2', '') }}"
+    mode: '750'
+  vars:
+    type: "catalog"
+  loop:
+     - "{{ lookup('fileglob', 'bareos-dir/{{ type }}/*') }}"
+  register: config_catalog
+
+- name: Run database scripts
+  ansible.builtin.shell:
+    cmd: "/usr/lib/bareos/scripts/{{ item }}"
+  loop:
+    - create_bareos_database
+    - make_bareos_tables
+    - grant_bareos_privileges
+  environment:
+        PGUSER: "{{ PGUSER }}"
+        PGHOST: "{{ PGHOST }}"
+        PGPASSWORD: "{{ PGPASSWORD }}"
+  when: prepare_database is true
+
+
+- name: Recursively update permissions on configs
+  ansible.builtin.file:
+    path: "{{ config_install_path }}"
+    state: directory
+    recurse: yes
+    owner: bareos
+    group: bareos
+
+- name: Apache2 default site config
+  ansible.builtin.replace:
+    path: /etc/apache2/sites-available/000-default.conf
+    regexp: "/var/www/html"
+    replace: "/usr/share/bareos-webui/public"
+  register: apache_default_site
+

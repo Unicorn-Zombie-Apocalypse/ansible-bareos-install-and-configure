@@ -1,0 +1,11 @@
+PGUSER: user
+PGHOST: example.com
+PGPASSWORD: password
+
+bareos_install_script: https://download.bareos.org/current/xUbuntu_22.04/add_bareos_repositories.sh
+config_dir: bareos-dir
+config_install_path: /root/config
+
+prepare_database: false
+
+timezone: Europe/Moscow
